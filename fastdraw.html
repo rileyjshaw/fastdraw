@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fastdraw</title>
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      position: absolute;
+      bottom: 0;
+      min-height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <img src="http://www.fastdraw.org/graphics/fd-xdee2.jpg" alt="The Daisy Kid: World's Fastest Gun">
+  <p>Tested in Firefox 28.0, which for some reason lets you override the new tab shortcut...</p>
+  <p>Press Command + T, then the first letter of your frequented website, then Enter.</p>
+  <p>Y'know, like you do on Chrome.</p>
+  <hr>
+  <script>
+    //tested in FF 28.0
+    (function() {
+      var KEYCODES = {
+        f: 70,
+        g: 71,
+        n: 78,
+        r: 82,
+        t: 84,
+        cmd: 224, //only in FF
+        enter: 13
+      };
+      var sites = {};
+      sites[KEYCODES.f] = 'Facebook';
+      sites[KEYCODES.g] = 'Gmail';
+      sites[KEYCODES.n] = 'Hacker News';
+      sites[KEYCODES.r] = 'Reddit';
+
+      var activeListener;
+
+      //phase1() waits for 'cmd' and then sets a listener for phase2.
+      //phase2() blocks 't' from opening a new tab, sets the
+      //  destination site, and waits for 'enter'.
+      function phase1(e) {
+        //adding a listener in here is okay because 'cmd' doesn't
+        //  throw repeated keydown events when held.
+        if (e.keyCode === KEYCODES.cmd) {
+          var destination, startTime = new Date();
+          var phase2 = function(e) {
+            var keyCode = e.keyCode;
+            var siteReference = sites[keyCode];
+            if (e.keyCode === KEYCODES.t) {
+              e.preventDefault(); //block new tab shortcut
+            } else if (keyCode === KEYCODES.enter) {
+              var diff = (new Date() - startTime) / 1000;
+              console.log(keyCode, typeof keyCode);
+              pagePrint('You navigated to ' + destination + ' in ' + diff + 's');
+
+              //remove active listener so that clicking enter again won't re-log
+              window.removeEventListener('keydown', activeListener);
+            } else if (siteReference) {
+              destination = siteReference;
+            } else if (!destination) {
+              destination = 'a website starting with "' + String.fromCharCode(+keyCode) + '"';
+            }
+          };
+
+          //remove active listener in case one already exists, which
+          //  happens if user spams Command without hitting Enter.
+          window.removeEventListener('keydown', activeListener);
+          activeListener = phase2;
+          window.addEventListener('keydown', phase2);
+        }
+      }
+
+      window.addEventListener('keydown', phase1);
+
+      //HELPER FUNCTIONS
+      function pagePrint(message) {
+        var p = document.createElement('p');
+        p.textContent = message;
+        document.body.appendChild(p);
+      }
+    })();
+  </script>
+</body>
+</html>
