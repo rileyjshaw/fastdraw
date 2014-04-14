@@ -4,4 +4,4 @@ Tested in Firefox 28.0, which for some reason lets you override the new tab shor
 
 Press Command + T, then the first letter of your frequented website, then Enter.
 
-Y'know, like you do on Chrome.
+Y'know, like you do in Chrome.
